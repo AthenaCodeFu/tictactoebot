@@ -8,7 +8,8 @@ require 'interface'
 
 require 'getoptlong'
 
-usage = <<EOS
+def usage
+<<EOS
 Usage: play [-x COMMAND] [-o COMMAND] [other options...]
 
 This program runs a game of tic tac toe in the terminal. Either or both of the players
@@ -42,42 +43,52 @@ EXAMPLE
         ./play -o bots/idiot.pl
 
 EOS
-
-opts = GetoptLong.new( [ '-x', GetoptLong::REQUIRED_ARGUMENT ],
-                       [ '-o', GetoptLong::REQUIRED_ARGUMENT ],
-                       [ '-h', '--help', GetoptLong::NO_ARGUMENT ],
-                       [ '--show-communication', GetoptLong::NO_ARGUMENT ],
-                       [ '--print-outcome', GetoptLong::NO_ARGUMENT ] )
-
-x = nil
-o = nil
-show_communication = false
-print_outcome = false
-
-opts.each do |opt, arg|
-  case opt
-  when '-h'
-    puts usage
-    exit
-  when '-x'
-    x = BotPlayerInterface.start_bot(arg)
-  when '-o'
-    o = BotPlayerInterface.start_bot(arg)
-  when '--show-communication'
-    show_communication = true
-  when '--print-outcome'
-    print_outcome = true
-  end    
 end
 
-x ||= InteractivePlayerInterface.new
-o ||= InteractivePlayerInterface.new
+def main
+  opts = GetoptLong.new( [ '-x', GetoptLong::REQUIRED_ARGUMENT ],
+                         [ '-o', GetoptLong::REQUIRED_ARGUMENT ],
+                         [ '-h', '--help', GetoptLong::NO_ARGUMENT ],
+                         [ '--show-communication', GetoptLong::NO_ARGUMENT ],
+                         [ '--print-outcome', GetoptLong::NO_ARGUMENT ] )
 
-x.show_communication = show_communication unless x.interactive?
-o.show_communication = show_communication unless o.interactive?
+  x = nil
+  o = nil
+  show_communication = false
+  print_outcome = false
 
-game = Game.new(x, o)
+  opts.each do |opt, arg|
+    case opt
+    when '-h'
+      puts usage
+      exit
+    when '-x'
+      x = BotPlayerInterface.start_bot(arg)
+    when '-o'
+      o = BotPlayerInterface.start_bot(arg)
+    when '--show-communication'
+      show_communication = true
+    when '--print-outcome'
+      print_outcome = true
+    end    
+  end
 
-outcome = game.run
+  x ||= InteractivePlayerInterface.new
+  o ||= InteractivePlayerInterface.new
 
-puts outcome.to_s.upcase if print_outcome
+  x.show_communication = show_communication unless x.interactive?
+  o.show_communication = show_communication unless o.interactive?
+
+  game = Game.new(x, o)
+
+  outcome = game.run
+
+  puts outcome.to_s.upcase if print_outcome
+end
+
+
+begin
+  main
+ensure
+  BotPlayerInterface.end_bots
+end

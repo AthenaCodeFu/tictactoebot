@@ -45,24 +45,30 @@ class BotPlayerInterface
     false
   end
 
+  @@pids = []
+
   # start the player bot in a new process and return an interface connected to it
   def self.start_bot(command)
     to_bot_read, to_bot_write = IO.pipe
     from_bot_read, from_bot_write = IO.pipe
 
-    pid = fork do
+    @@pids << fork do
       STDIN.reopen(to_bot_read)
       STDOUT.reopen(from_bot_write)
       exec(command)
     end
 
-    # make sure the subprocess doesn't become a zombie
-    Process.detach(pid)
-
     to_bot_read.close
     from_bot_write.close
 
     return self.new(to_bot_write, from_bot_read)
+  end
+
+  # kill all subprocesses and wait for them to end
+  def self.end_bots
+    @@pids.each {|pid| Process.kill('KILL', pid) }
+    @@pids.each {|pid| Process.wait(pid)         }
+    @@pids.clear
   end
 
 end
