@@ -30,8 +30,8 @@ Or, for extra entertainment value, pit two idiots against each other:
 Program a better bot without making changes to the main game's code.
 
 This will involve two main challenges:
-1. figure out how to get the information you need from the game's output, and
-2. implement some kind of game strategy
+ 1. figure out how to get the information you need from the game's output, and
+ 2. implement some kind of game strategy
 
 Take a look at the code in idiot.pl to get a basic idea of where to start, but feel free
 to write your bot in any available language that you prefer.
