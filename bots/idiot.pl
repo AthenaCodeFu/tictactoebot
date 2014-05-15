@@ -4,7 +4,8 @@
 #
 # This is about the simplest tic tac toe bot possible. It makes no attempt to understand
 # the game's state - it just offers a random space on the board every time the server
-# asks for a move.
+# asks for a move. If the space happens to already be occupied, the game will simply
+# prompt it for a new move. Eventually, this bot is bound to stumble on a legal move!
 
 use strict;
 use warnings;
