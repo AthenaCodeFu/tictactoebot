@@ -39,7 +39,7 @@ EXAMPLE
 
   To play a game between a human (X) and a bot (O) that makes random moves:
 
-        ./play -o bots/random.pl
+        ./play -o bots/idiot.pl
 
 EOS
 
