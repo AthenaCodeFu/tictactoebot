@@ -1,0 +1,83 @@
+#!/usr/bin/env ruby
+
+# add server/lib to the library include path
+$: << File.join(File.expand_path(File.dirname(__FILE__)), 'game', 'lib')
+
+require 'game'
+require 'interface'
+
+require 'getoptlong'
+
+usage = <<EOS
+Usage: play [-x COMMAND] [-o COMMAND] [other options...]
+
+This program runs a game of tic tac toe in the terminal. Either or both of the players
+can be controlled by an external script.
+
+OPTIONS
+
+  -x COMMAND:
+        Run COMMAND in a subprocess and ask it to control player X.
+        Make sure you quote COMMAND if it contains whitespace!
+
+  -o COMMAND:
+        Same as -x, except for player O.
+
+  -h, --help:
+        Show this message.
+
+  --show-communication:
+        Log messages to and from the non-interactive players (those specified with -x and
+        -o) for debugging purposes.
+
+  --print-outcome:
+        At the end of the game, print the outcome ("X", "O", or "DRAW"). This is handy if
+        both players are non-interactive, since you won't otherwise see outcome message
+        that is sent to them.
+
+EXAMPLE
+
+  To play a game between a human (X) and a bot (O) that makes random moves:
+
+        ./play -o bots/random.pl
+
+EOS
+
+opts = GetoptLong.new( [ '-x', GetoptLong::REQUIRED_ARGUMENT ],
+                       [ '-o', GetoptLong::REQUIRED_ARGUMENT ],
+                       [ '-h', '--help', GetoptLong::NO_ARGUMENT ],
+                       [ '--show-communication', GetoptLong::NO_ARGUMENT ],
+                       [ '--print-outcome', GetoptLong::NO_ARGUMENT ] )
+
+x = nil
+o = nil
+show_communication = false
+print_outcome = false
+
+opts.each do |opt, arg|
+  case opt
+  when '-h'
+    puts usage
+    exit
+  when '-x'
+    x = BotPlayerInterface.start_bot(arg)
+  when '-o'
+    o = BotPlayerInterface.start_bot(arg)
+  when '--show-communication'
+    show_communication = true
+  when '--print-outcome'
+    print_outcome = true
+  end    
+end
+
+x ||= InteractivePlayerInterface.new
+o ||= InteractivePlayerInterface.new
+
+x.show_communication = show_communication unless x.interactive?
+o.show_communication = show_communication unless o.interactive?
+
+game = Game.new(x, o)
+
+outcome = game.run
+
+puts outcome.to_s.upcase if print_outcome
